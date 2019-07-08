@@ -1,0 +1,51 @@
+{
+  "name": "inspector",
+  "version": "0.0.1",
+  "description": "Properties inspector playground",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack-dev-server --mode development --env.dev --hot"
+  },
+  "keywords": [],
+  "author": "'Igor Kling' <\"klingiv@altarix.ru\">",
+  "private": true,
+  "license": "ISC",
+  "dependencies": {
+    "@blueprintjs/core": "^3.15.1",
+    "@blueprintjs/icons": "^3.8.0",
+    "@blueprintjs/select": "^3.8.0",
+    "immer": "^3.1.3",
+    "js-beautify": "^1.10.0",
+    "mobx": "^5.9.0",
+    "mobx-react": "^5.4.3",
+    "moment": "^2.24.0",
+    "ramda": "^0.26.1",
+    "react": "16.8.6",
+    "react-color": "^2.17.3",
+    "react-custom-scrollbars": "^4.2.1",
+    "react-dom": "^16.8.6",
+    "spark-md5": "^3.0.0",
+    "styled-components": "^4.1.3",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.3.0",
+    "@babel/plugin-proposal-decorators": "^7.3.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/register": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.0",
+    "core-js": "^3.0.1",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.29.3",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.1.14"
+  }
+}
