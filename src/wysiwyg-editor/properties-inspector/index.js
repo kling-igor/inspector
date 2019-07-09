@@ -14,7 +14,7 @@ const RootStyle = styled.div`
 `
 
 export const PropertiesInspector = observer(
-  ({ viewState, namedStyles, schema, stylesSchema, styleSchemes, coollectPropertiesStates, propertiesDidChange }) => {
+  ({ viewState, namedStyles, schema, stylesSchema, coollectPropertiesStates, propertiesDidChange }) => {
     // отделяем стили от других свойств объекта
     const { styles, ...rest } = viewState
 

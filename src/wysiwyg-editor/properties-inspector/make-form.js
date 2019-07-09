@@ -43,7 +43,7 @@ const makeForm = (schema, propertiesDidChange) => {
   let component
 
   for (const item of schema) {
-    const { label, type, subtype, key, required, placeholder, options } = item
+    const { label, type, subtype, key, required, placeholder, options, disabled } = item
 
     switch (type) {
       case TYPE.NAMEDSTYLESELECT: {
@@ -59,13 +59,13 @@ const makeForm = (schema, propertiesDidChange) => {
 
       case TYPE.BOOLEAN:
         {
-          component = Checkbox(label)
+          component = Checkbox(label, disabled)
         }
         break
 
       case TYPE.STRING:
         {
-          component = TextInput(key, label, placeholder, required)
+          component = TextInput(key, label, placeholder, required, disabled)
         }
         break
 
@@ -82,7 +82,7 @@ const makeForm = (schema, propertiesDidChange) => {
           //   throw new Error('Invalid subtype for align - unable to make widget')
           // }
           // } else {
-          component = Options(label, options)
+          component = Options(label, options, disabled)
           // }
         }
         break
