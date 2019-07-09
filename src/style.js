@@ -14,7 +14,7 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     font-family: Roboto, sans-serif;
     overflow: hidden;
-    background-color: white;
+    background-color: #30404D;
     height: 100%;
     overflow: hidden !important;
   }

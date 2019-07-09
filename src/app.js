@@ -60,11 +60,22 @@ const rootStyle = { width: 300, height: '100%' }
 // TODO: до вызова PropertiesInspector определяем  тип и вложенность и если это View то в копии схемы делаем  id disabled и доабаляемя после id public и entryPoint
 
 export default class App extends PureComponent {
+  renderThumbVertical = props => {
+    return <div {...props} className="thumb-vertical" style={{ backgroundColor: '#ffffff80', borderRadius: '3px' }} />
+  }
+
   render() {
     return (
       <>
         <GlobalStyle />
-        <Scrollbars style={rootStyle} thumbMinSize={30} autoHide autoHideTimeout={1000} autoHideDuration={200}>
+        <Scrollbars
+          style={rootStyle}
+          thumbMinSize={30}
+          autoHide
+          autoHideTimeout={1000}
+          autoHideDuration={200}
+          renderThumbVertical={this.renderThumbVertical}
+        >
           <PropertiesInspector
             viewState={file.selectedViewState}
             schema={propertiesSchema}

@@ -57,7 +57,7 @@ export const PropertiesInspector = observer(
       const StylePanes = makeStyleForms(stylesSchema, styles, namedStyles, coollectStyleStates, propertiesDidChange)
 
       return (
-        <RootStyle>
+        <RootStyle className="bp3-dark">
           <Form state={selfState} />
           <StylePanes />
         </RootStyle>
@@ -67,7 +67,7 @@ export const PropertiesInspector = observer(
     coollectPropertiesStates(selfState)
 
     return (
-      <RootStyle>
+      <RootStyle className="bp3-dark">
         <Form state={selfState} />
       </RootStyle>
     )
