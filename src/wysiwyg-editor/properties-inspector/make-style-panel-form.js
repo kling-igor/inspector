@@ -10,6 +10,8 @@ import { TYPE } from '../interface-types'
 import { Divider } from './components'
 import { useCollapsible } from './collapsibe-header'
 
+import styleSchemes from './style-schemes'
+
 const TitleStyle = styled.div`
   -webkit-app-region: no-drag;
   -webkit-touch-callout: none;
@@ -120,7 +122,7 @@ export const makeStyleForms = (
   const makeStyleElementForm = (subitems, styleKey, title) => {
     let elements = []
     // если указаны элементные именованные стили (как правило, должны)
-    const hasNamedStyles = !!subitems.find(item => item.type === TYPE.NAMEDSTYLESELECT)
+    const hasNamedStyles = !!subitems.find(item => item === 'namedstyleselect')
     if (hasNamedStyles) {
       const initialNamedStyles = filterInitialNamedStyles(globalNamedStyles)(styles)
       const namedStylesState = observable(initialNamedStyles)
@@ -139,9 +141,20 @@ export const makeStyleForms = (
     }
 
     subitems
-      .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
+      .filter(item => item !== 'namedstyleselect')
       .forEach((item, i) => {
-        const { type, title, schemes } = item
+        let schemaItem
+        if (typeof item === 'string') {
+          schemaItem = styleSchemes[item]
+        } else {
+          schemaItem = item
+        }
+
+        if (!schemaItem) {
+          throw new Error('no schema for ', item)
+        }
+
+        const { type, title, schemes } = schemaItem
 
         if (type === 'divider') {
           elements.push(() => <Divider />)
@@ -159,21 +172,12 @@ export const makeStyleForms = (
     ))
 
     return () => <Collapsible />
-
-    // return () => (
-    //   <>
-    //     <div>{`COLLAPSIBLE HEADER ${title}`}</div>
-    //     {elements.map((Component, i) => (
-    //       <Component key={`${styleKey}_${i}`} />
-    //     ))}
-    //   </>
-    // )
   }
 
   let elements = []
 
   // если указаны корневые именованные стили (как правило, должны)
-  const hasNamedStyles = !!schema.find(item => item.type === TYPE.NAMEDSTYLESELECT)
+  const hasNamedStyles = !!schema.find(item => item === 'namedstyleselect')
   if (hasNamedStyles) {
     const initialNamedStyles = filterInitialNamedStyles(globalNamedStyles)(styles)
     const namedStylesState = observable(initialNamedStyles)
@@ -194,8 +198,19 @@ export const makeStyleForms = (
   // строим разворачиваемые формы элементов стиля
 
   const subItems = schema
-    .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
-    .map((schemaItem, i) => {
+    .filter(item => item !== 'namedstyleselect')
+    .map((item, i) => {
+      let schemaItem
+      if (typeof item === 'string') {
+        schemaItem = styleSchemes[item]
+      } else {
+        schemaItem = item
+      }
+
+      if (!schemaItem) {
+        throw new Error('no schema for ', item)
+      }
+
       const { styleKey, title, subitems } = schemaItem
       // делаем форму для целого подэлемента стиля
       const Component = makeStyleElementForm(subitems, styleKey, title)
