@@ -5,10 +5,10 @@ import {
   Divider,
   Checkbox,
   TextInput,
-  OrientationWidget,
   Options,
   ColorPickerRGB,
   ColorPickerRGBA,
+  OrientationWidget,
   AlignWidget3D,
   AlignWidget9D
 } from './components'

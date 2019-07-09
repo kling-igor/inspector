@@ -134,22 +134,27 @@ const namedStyles = [
   { name: 'selfMargin10', value: { self: [{ margin: 10 }] } },
   { name: 'selfBlueBack', value: { self: [{ backgroundColor: 'blue' }] } }
 ]
-const coollectPropertiesStates = () => {
-  console.log('coollectPropertiesStates')
-}
-const propertiesDidChange = () => {
-  console.log('propertiesDidChange')
-}
+
+// ОНИ ОПРЕДЕЛЕНЫ В VIEWFILE!!!
+// const coollectPropertiesStates = (properties, styles) => {
+//   console.log('coollectPropertiesStates', properties, styles)
+// }
+// const propertiesDidChange = () => {
+//   console.log('propertiesDidChange')
+// }
 
 const styleService = new StyleService(defaultTheme)
 
 const cleanPath = '/views/Example.json'
+
+// это для представления содержимого файла - будет сериализовано
 const viewState = {
   name: 'Example',
   type: 'view',
   public: true,
   entryPoint: true,
   align: 'center',
+  orientation: 'horizontal',
   style: [
     {
       self: [
@@ -163,9 +168,11 @@ const viewState = {
   ]
 }
 
+// загруженный файо
 const content = JSON.stringify(viewState)
 
-const selectedViewState = new ViewFile(cleanPath, content, styleService, namedStyles)
+// хендлер выбранного файла
+const file = new ViewFile(cleanPath, content, styleService, namedStyles)
 
 export default class App extends PureComponent {
   render() {
@@ -173,19 +180,19 @@ export default class App extends PureComponent {
       <>
         <GlobalStyle />
         <Scrollbars
-          style={{ width: 200, height: '100%' }}
+          style={{ width: 300, height: '100%' }}
           thumbMinSize={30}
           autoHide
           autoHideTimeout={1000}
           autoHideDuration={200}
         >
           <PropertiesInspector
-            viewState={selectedViewState}
+            viewState={file.selectedViewState}
             schema={propertiesSchema}
             stylesSchema={stylesSchema}
             namedStyles={namedStyles}
-            coollectPropertiesStates={coollectPropertiesStates}
-            propertiesDidChange={propertiesDidChange}
+            coollectPropertiesStates={file.coollectPropertiesStates}
+            propertiesDidChange={file.propertiesDidChange}
           />
         </Scrollbars>
       </>

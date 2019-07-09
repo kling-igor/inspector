@@ -2,12 +2,7 @@ import * as R from 'ramda'
 
 import { TYPE } from '../interface-types'
 import { lensGet, lensSet, isObject } from '../../utils'
-
-const defaultValues = {
-  [TYPE.BOOLEAN]: false,
-  [TYPE.NUMBER]: 0,
-  [TYPE.STRING]: ''
-}
+import defaultValues from './default-values'
 
 // TODO: протестировать!!!
 
