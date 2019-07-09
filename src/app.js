@@ -155,7 +155,7 @@ const viewState = {
   entryPoint: true,
   align: 'center',
   orientation: 'horizontal',
-  style: [
+  styles: [
     {
       self: [
         {

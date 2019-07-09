@@ -5,6 +5,9 @@ import { lensGet, isObject } from '../../utils'
 import makeForm from './make-form'
 import MultiSelect from './multiselect'
 import makeStyleModel from './make-style-model'
+import { TYPE } from '../interface-types'
+
+import { Divider } from './components'
 
 const onNamedStylesSelectChange = (namedStylesState, propertiesDidChange) => collection => {
   namedStylesState.replace(collection)
@@ -72,23 +75,16 @@ export const makeStyleForms = (
 
     const hasNamedStyles = !!settingsSchema.find(item => item.type === TYPE.NAMEDSTYLESELECT)
 
-    let namedStylesState
-    let initialNamedStyles = []
-
     if (hasNamedStyles) {
-      initialNamedStyles = filterInitialNamedStyles(globalNamedStyles)(elementStyle)
-
-      namedStylesState = observable(initialNamedStyles)
+      const initialNamedStyles = filterInitialNamedStyles(globalNamedStyles)(elementStyle)
+      const namedStylesState = observable(initialNamedStyles)
       observableStates.push({ key: elementKey, state: namedStylesState })
-    }
-
-    if (hasNamedStyles) {
       return () => (
         <div>
           {/* это будет пока заголовок секции формы стиля */}
           {!!title && <div>{title}</div>}
           <MultiSelect
-            items={globalNamedStyles}
+            items={globalNamedStyles.map(item => item.name)}
             initialItems={initialNamedStyles}
             placeholderText="Select named style.."
             noResultText="No named styles."
@@ -112,6 +108,45 @@ export const makeStyleForms = (
     )
   }
 
+  /**
+   * Создает разворачиваемую форму для свойств подэлемента стиля
+   * @param {Array} paneSchema - как правило это subitems в описании стиля
+   * @param {String} elementKey - имя подэлемента стиля  (self, title, etc...)
+   */
+  const makeStyleCategoryPane = (paneSchema, elementKey) => {
+    const children = paneSchema
+      .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
+      .map((paneSchemaItem, i) => {
+        const { type, styleKey, title, subitems, schemes } = paneSchemaItem
+
+        if (type === 'divider') {
+          return Divider
+        }
+
+        let pane
+
+        // if (subitems) {
+        //   pane = makeStyleCategoryPane(subitems, styleKey || elementKey, title)
+        // } else
+        if (schemes) {
+          pane = makeStyleFormPane(schemes, styleKey || elementKey, title)
+        } else {
+          throw new Error("Invalid scheme - neither 'subitems' nor 'schemes' defined")
+        }
+
+        return pane
+      })
+
+    // тут создаем элемент заголовка, при клике на котором форма будет сворачиваться\разворачиваться
+    return (
+      <>
+        {elements.map((Component, i) => (
+          <Component key={i} />
+        ))}
+      </>
+    )
+  }
+
   const elements = []
 
   // если указаны корневые именованные стили (как правило, должны)
@@ -122,47 +157,29 @@ export const makeStyleForms = (
     observableStates.push({ key: null, state: namedStylesState })
 
     // первый элемент формы будет элемент выбора именованного стиля для всего компонента
-    elements.push(
+    elements.push(() => (
       <MultiSelect
-        items={globalNamedStyles}
+        items={globalNamedStyles.map(item => item.name)}
         initialItems={initialNamedStyles}
         placeholderText="Select named style.."
         noResultText="No named styles."
         onSelectChange={onNamedStylesSelectChange(namedStylesState, propertiesDidChange)}
       />
-    )
+    ))
   }
 
-  // TODO:!!  НУЖНО РЕКУРСИВНО СТРОИТЬ ФОРМЫ ПОКА РЕКУРСИЯ НЕ СТОЛКНЕТСЯ С ЧИСТЫМ ОПРЕДЕЛЕНИЕМ schemes ДЛЯ КОТОРОГО ВЫЗВАЕТСЯ ПОСТРОЕНИЕ Form
+  // const Panes = makeStyleCategoryPane(schema)
 
-  const makeStyleCategoryPane = (paneSchema, elementKey) => {
-    const children = paneSchema
-      .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
-      .map((paneSchemaItem, i) => {
-        const { styleKey, title, subitems, schemes } = paneSchemaItem
-
-        let pane
-
-        if (subitems) {
-          pane = makeStyleCategoryPane(subitems, styleKey || elementKey, title)
-        } else if (schemes) {
-          pane = makeStyleFormPane(schemes, styleKey || elementKey)
-        } else {
-          throw new Error("Invalid scheme - neither 'subitems' nor 'schemes' defined")
-        }
-
-        return pane
-      })
-
-    return <div>{children}</div>
-  }
-
-  const Panes = makeStyleCategoryPane(schema)
-
-  // уведомляем о всем срезах состояния стиля
+  // уведомляем о всех срезах состояния стиля
   collectObservableStates(observableStates)
 
   // строим формы для компонентов стиля
 
-  return () => <Panes />
+  return () => (
+    <>
+      {elements.map((Component, i) => (
+        <Component key={i} />
+      ))}
+    </>
+  )
 }
