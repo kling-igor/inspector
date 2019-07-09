@@ -80,7 +80,7 @@ export const makeStyleForms = (
       const namedStylesState = observable(initialNamedStyles)
       observableStates.push({ key: elementKey, state: namedStylesState })
       return () => (
-        <div>
+        <>
           {/* это будет пока заголовок секции формы стиля */}
           {!!title && <div>{title}</div>}
           <MultiSelect
@@ -90,63 +90,21 @@ export const makeStyleForms = (
             noResultText="No named styles."
             onSelectChange={onNamedStylesSelectChange(namedStylesState, propertiesDidChange)}
           />
-          <div style={{ padding: 8 }}>
-            <Form state={state} />
-          </div>
-        </div>
+          <Form state={state} />
+        </>
       )
     }
 
     return () => (
       <>
         {/* это будет пока заголовок секции формы стиля */}
-        {!!title && <div>{title}</div>}
-        <div style={{ padding: 8 }}>
-          <Form state={state} />
-        </div>
+        {!!title && <div style={{ textAlign: 'right' }}>{title}</div>}
+        <Form state={state} />
       </>
     )
   }
 
-  /**
-   * Создает разворачиваемую форму для свойств подэлемента стиля
-   * @param {Array} paneSchema - как правило это subitems в описании стиля
-   * @param {String} elementKey - имя подэлемента стиля  (self, title, etc...)
-   */
-  // const makeStyleCategoryPane = (paneSchema, elementKey) => {
-  //   const children = paneSchema
-  //     .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
-  //     .map((paneSchemaItem, i) => {
-  //       const { type, styleKey, title, subitems, schemes } = paneSchemaItem
-
-  //       if (type === 'divider') {
-  //         return Divider
-  //       }
-
-  //       let pane
-
-  //       // if (subitems) {
-  //       //   pane = makeStyleCategoryPane(subitems, styleKey || elementKey, title)
-  //       // } else
-  //       if (schemes) {
-  //         pane = makeStyleFormPane(schemes, styleKey || elementKey, title)
-  //       } else {
-  //         throw new Error("Invalid scheme - neither 'subitems' nor 'schemes' defined")
-  //       }
-
-  //       return pane
-  //     })
-
-  //   // тут создаем элемент заголовка, при клике на котором форма будет сворачиваться\разворачиваться
-  //   return (
-  //     <>
-  //       {elements.map((Component, i) => (
-  //         <Component key={i} />
-  //       ))}
-  //     </>
-  //   )
-  // }
-
+  // создание разворачиваемой формы для элемента стиля (self, label, etc)
   const makeStyleElementForm = (subitems, styleKey, title) => {
     let elements = []
     // если указаны элементные именованные стили (как правило, должны)
@@ -168,6 +126,18 @@ export const makeStyleForms = (
       ))
     }
 
+    subitems
+      .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
+      .forEach((item, i) => {
+        const { type, title, schemes } = item
+
+        if (type === 'divider') {
+          elements.push(() => <Divider />)
+        } else {
+          elements.push(makeStyleFormPane(schemes, styleKey, title))
+        }
+      })
+
     return () => (
       <>
         <div>{`COLLAPSIBLE HEADER ${title}`}</div>
@@ -176,8 +146,6 @@ export const makeStyleForms = (
         ))}
       </>
     )
-
-    // return () => <div>title</div>
   }
 
   let elements = []

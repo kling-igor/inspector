@@ -1,12 +1,13 @@
 import React from 'react'
-import { FormGroup, InputGroup } from "@blueprintjs/core"
+import { FormGroup, InputGroup } from '@blueprintjs/core'
 
 export default (key, label, placeholder, required) => ({ value, onChange }) => (
   <FormGroup
     // inline
+    className="bp3-text-small"
     label={label}
     labelFor={`${key}-text-input`}
-    labelInfo={required && "(required)"}
+    labelInfo={required && '(required)'}
   >
     <InputGroup
       // name={key}

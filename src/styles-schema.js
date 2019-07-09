@@ -47,16 +47,17 @@ export default [
     styleKey: 'self',
     title: 'self',
     subitems: [
-      { type: 'namedstyleselect' }
-      // dimensionsSchema,
-      // { type: 'divider' }
-      // colorsSchema,
-      // { type: 'divider' },
-      // fontSchema,
-      // { type: 'divider' },
-      // marginsSchema,
-      // { type: 'divider' },
-      // paddingSchema
+      { type: 'namedstyleselect' },
+      { type: 'divider' },
+      dimensionsSchema,
+      { type: 'divider' },
+      colorsSchema,
+      { type: 'divider' },
+      fontSchema,
+      { type: 'divider' },
+      marginsSchema,
+      { type: 'divider' },
+      paddingSchema
     ]
   }
 ]
