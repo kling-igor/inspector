@@ -99,6 +99,17 @@ class ColorPicker extends Component {
           <div style={styles.popover}>
             <div style={styles.cover} onClick={this.handleClose} />
             <SketchPicker
+              // width={200}
+              styles={{
+                picker: {
+                  // width: 200,
+                  backgroundColor: '#A7B6C2',
+                  padding: '10px 10px 0',
+                  boxSizing: 'initial',
+                  borderRadius: '2px',
+                  boxShadow: '0 0 0 1px rgba(0,0,0,.15), 0 8px 16px rgba(0,0,0,.15)'
+                }
+              }}
               disableAlpha={this.props.disableAlpha}
               color={fillColor}
               onChange={this.handleChange}
