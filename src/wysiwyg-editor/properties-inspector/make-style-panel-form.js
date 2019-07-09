@@ -1,13 +1,28 @@
 import React from 'react'
 import { observable } from 'mobx'
 import * as deepmerge from 'deepmerge'
+import styled from 'styled-components'
 import { lensGet, isObject } from '../../utils'
 import makeForm from './make-form'
 import MultiSelect from './multiselect'
 import makeStyleModel from './make-style-model'
 import { TYPE } from '../interface-types'
-
 import { Divider } from './components'
+import { useCollapsible } from './collapsibe-header'
+
+const TitleStyle = styled.div`
+  -webkit-app-region: no-drag;
+  -webkit-touch-callout: none;
+  user-select: none;
+  text-align: right;
+  text-transform: uppercase;
+`
+
+const StylesLabelStyle = styled.p`
+  -webkit-app-region: no-drag;
+  -webkit-touch-callout: none;
+  user-select: none;
+`
 
 const onNamedStylesSelectChange = (namedStylesState, propertiesDidChange) => collection => {
   namedStylesState.replace(collection)
@@ -81,8 +96,6 @@ export const makeStyleForms = (
       observableStates.push({ key: elementKey, state: namedStylesState })
       return () => (
         <>
-          {/* это будет пока заголовок секции формы стиля */}
-          {!!title && <div>{title}</div>}
           <MultiSelect
             items={globalNamedStyles.map(item => item.name)}
             initialItems={initialNamedStyles}
@@ -97,8 +110,7 @@ export const makeStyleForms = (
 
     return () => (
       <>
-        {/* это будет пока заголовок секции формы стиля */}
-        {!!title && <div style={{ textAlign: 'right' }}>{title}</div>}
+        {!!title && <TitleStyle className="bp3-text-muted">{title}</TitleStyle>}
         <Form state={state} />
       </>
     )
@@ -138,14 +150,24 @@ export const makeStyleForms = (
         }
       })
 
-    return () => (
+    const Collapsible = useCollapsible(title, () => (
       <>
-        <div>{`COLLAPSIBLE HEADER ${title}`}</div>
         {elements.map((Component, i) => (
           <Component key={`${styleKey}_${i}`} />
         ))}
       </>
-    )
+    ))
+
+    return () => <Collapsible />
+
+    // return () => (
+    //   <>
+    //     <div>{`COLLAPSIBLE HEADER ${title}`}</div>
+    //     {elements.map((Component, i) => (
+    //       <Component key={`${styleKey}_${i}`} />
+    //     ))}
+    //   </>
+    // )
   }
 
   let elements = []
@@ -188,6 +210,7 @@ export const makeStyleForms = (
   // на этом уровне существует выбора именованных стилей для всего элемента и разворачиваемые формы для всех подэлементов стиля
   return () => (
     <>
+      <StylesLabelStyle>Styles</StylesLabelStyle>
       {elements.map((Component, i) => (
         <Component key={`root_${i}`} />
       ))}

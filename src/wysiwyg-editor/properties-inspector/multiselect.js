@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { Button, MenuItem } from '@blueprintjs/core'
 import { MultiSelect } from '@blueprintjs/select'
 
+const rootStyle = { marginBottom: 8 }
+
 export default class extends Component {
   state = {
     items: []
@@ -80,19 +82,21 @@ export default class extends Component {
     const clearButton = items.length > 0 ? <Button icon="cross" minimal onClick={this.handleClear} /> : null
 
     return (
-      <MultiSelect
-        fill
-        itemPredicate={this.filterItem}
-        items={this.props.items}
-        itemRenderer={this.renderItem}
-        noResults={<MenuItem disabled={true} text={this.props.noResultText} />}
-        onItemSelect={this.handleItemSelect}
-        popoverProps={{ minimal: true }}
-        tagRenderer={this.renderTag}
-        tagInputProps={{ tagProps: { minimal: true }, onRemove: this.handleTagRemove, rightElement: clearButton }}
-        selectedItems={this.state.items}
-        placeholder={this.props.placeholderText}
-      />
+      <div style={rootStyle}>
+        <MultiSelect
+          fill
+          itemPredicate={this.filterItem}
+          items={this.props.items}
+          itemRenderer={this.renderItem}
+          noResults={<MenuItem disabled={true} text={this.props.noResultText} />}
+          onItemSelect={this.handleItemSelect}
+          popoverProps={{ minimal: true }}
+          tagRenderer={this.renderTag}
+          tagInputProps={{ tagProps: { minimal: true }, onRemove: this.handleTagRemove, rightElement: clearButton }}
+          selectedItems={this.state.items}
+          placeholder={this.props.placeholderText}
+        />
+      </div>
     )
   }
 }

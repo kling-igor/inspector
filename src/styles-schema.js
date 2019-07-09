@@ -48,16 +48,33 @@ export default [
     title: 'self',
     subitems: [
       { type: 'namedstyleselect' },
-      { type: 'divider' },
+      // { type: 'divider' },
       dimensionsSchema,
-      { type: 'divider' },
+      // { type: 'divider' },
       colorsSchema,
-      { type: 'divider' },
+      // { type: 'divider' },
       fontSchema,
-      { type: 'divider' },
+      // { type: 'divider' },
       marginsSchema,
-      { type: 'divider' },
+      // { type: 'divider' },
       paddingSchema
     ]
   }
+  // {
+  //   styleKey: 'label',
+  //   title: 'label',
+  //   subitems: [
+  //     { type: 'namedstyleselect' },
+  //     { type: 'divider' },
+  //     dimensionsSchema,
+  //     { type: 'divider' },
+  //     colorsSchema,
+  //     { type: 'divider' },
+  //     fontSchema,
+  //     { type: 'divider' },
+  //     marginsSchema,
+  //     { type: 'divider' },
+  //     paddingSchema
+  //   ]
+  // }
 ]

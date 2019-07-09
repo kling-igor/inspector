@@ -1,23 +1,18 @@
 import React, { Fragment } from 'react'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
-
-// import { componentPropertiesSchema, componentStylesSchema, TYPE } from '../../form-schemas'
+import styled from 'styled-components'
 
 import { TYPE } from '../interface-types'
-// import { makeStylePanelStack } from './make-style-panel-stack'
 import { makeStyleForms } from './make-style-panel-form'
 import makeForm from './make-form'
 import defaultValues from './default-values'
 
-const containerStyle = { padding: 12, height: '100%', overflowX: 'hidden', overflowY: 'auto' }
+const RootStyle = styled.div`
+  padding: 8px;
+  height: 100%;
+`
 
-/**
- * @export
- * @class PropertiesInspector
- * @extends {Component}
- * @example <PropertiesInspector viewState={viewState} namedStyles={namedStyles}/>
- */
 export const PropertiesInspector = observer(
   ({ viewState, namedStyles, schema, stylesSchema, styleSchemes, coollectPropertiesStates, propertiesDidChange }) => {
     // отделяем стили от других свойств объекта
@@ -62,19 +57,19 @@ export const PropertiesInspector = observer(
       const StylePanes = makeStyleForms(stylesSchema, styles, namedStyles, coollectStyleStates, propertiesDidChange)
 
       return (
-        <div /*className="bp3-dark"*/ style={containerStyle}>
+        <RootStyle>
           <Form state={selfState} />
           <StylePanes />
-        </div>
+        </RootStyle>
       )
     }
 
     coollectPropertiesStates(selfState)
 
     return (
-      <div /*className="bp3-dark"*/ style={containerStyle}>
+      <RootStyle>
         <Form state={selfState} />
-      </div>
+      </RootStyle>
     )
   }
 )
