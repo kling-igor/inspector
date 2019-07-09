@@ -113,41 +113,74 @@ export const makeStyleForms = (
    * @param {Array} paneSchema - как правило это subitems в описании стиля
    * @param {String} elementKey - имя подэлемента стиля  (self, title, etc...)
    */
-  const makeStyleCategoryPane = (paneSchema, elementKey) => {
-    const children = paneSchema
-      .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
-      .map((paneSchemaItem, i) => {
-        const { type, styleKey, title, subitems, schemes } = paneSchemaItem
+  // const makeStyleCategoryPane = (paneSchema, elementKey) => {
+  //   const children = paneSchema
+  //     .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
+  //     .map((paneSchemaItem, i) => {
+  //       const { type, styleKey, title, subitems, schemes } = paneSchemaItem
 
-        if (type === 'divider') {
-          return Divider
-        }
+  //       if (type === 'divider') {
+  //         return Divider
+  //       }
 
-        let pane
+  //       let pane
 
-        // if (subitems) {
-        //   pane = makeStyleCategoryPane(subitems, styleKey || elementKey, title)
-        // } else
-        if (schemes) {
-          pane = makeStyleFormPane(schemes, styleKey || elementKey, title)
-        } else {
-          throw new Error("Invalid scheme - neither 'subitems' nor 'schemes' defined")
-        }
+  //       // if (subitems) {
+  //       //   pane = makeStyleCategoryPane(subitems, styleKey || elementKey, title)
+  //       // } else
+  //       if (schemes) {
+  //         pane = makeStyleFormPane(schemes, styleKey || elementKey, title)
+  //       } else {
+  //         throw new Error("Invalid scheme - neither 'subitems' nor 'schemes' defined")
+  //       }
 
-        return pane
-      })
+  //       return pane
+  //     })
 
-    // тут создаем элемент заголовка, при клике на котором форма будет сворачиваться\разворачиваться
-    return (
+  //   // тут создаем элемент заголовка, при клике на котором форма будет сворачиваться\разворачиваться
+  //   return (
+  //     <>
+  //       {elements.map((Component, i) => (
+  //         <Component key={i} />
+  //       ))}
+  //     </>
+  //   )
+  // }
+
+  const makeStyleElementForm = (subitems, styleKey, title) => {
+    let elements = []
+    // если указаны элементные именованные стили (как правило, должны)
+    const hasNamedStyles = !!subitems.find(item => item.type === TYPE.NAMEDSTYLESELECT)
+    if (hasNamedStyles) {
+      const initialNamedStyles = filterInitialNamedStyles(globalNamedStyles)(styles)
+      const namedStylesState = observable(initialNamedStyles)
+      observableStates.push({ key: styleKey, state: namedStylesState })
+
+      // первый элемент формы будет элемент выбора именованного стиля для подэлемента стиля
+      elements.push(() => (
+        <MultiSelect
+          items={globalNamedStyles.map(item => item.name)}
+          initialItems={initialNamedStyles}
+          placeholderText={`Select named style for '${styleKey}'...`}
+          noResultText="No named styles."
+          onSelectChange={onNamedStylesSelectChange(namedStylesState, propertiesDidChange)}
+        />
+      ))
+    }
+
+    return () => (
       <>
+        <div>{`COLLAPSIBLE HEADER ${title}`}</div>
         {elements.map((Component, i) => (
-          <Component key={i} />
+          <Component key={`${styleKey}_${i}`} />
         ))}
       </>
     )
+
+    // return () => <div>title</div>
   }
 
-  const elements = []
+  let elements = []
 
   // если указаны корневые именованные стили (как правило, должны)
   const hasNamedStyles = !!schema.find(item => item.type === TYPE.NAMEDSTYLESELECT)
@@ -161,24 +194,34 @@ export const makeStyleForms = (
       <MultiSelect
         items={globalNamedStyles.map(item => item.name)}
         initialItems={initialNamedStyles}
-        placeholderText="Select named style.."
+        placeholderText="Select named style for entire element..."
         noResultText="No named styles."
         onSelectChange={onNamedStylesSelectChange(namedStylesState, propertiesDidChange)}
       />
     ))
   }
 
-  // const Panes = makeStyleCategoryPane(schema)
+  // строим разворачиваемые формы элементов стиля
+
+  const subItems = schema
+    .filter(item => item.type !== TYPE.NAMEDSTYLESELECT)
+    .map((schemaItem, i) => {
+      const { styleKey, title, subitems } = schemaItem
+      // делаем форму для целого подэлемента стиля
+      const Component = makeStyleElementForm(subitems, styleKey, title)
+      return () => <Component />
+    })
+
+  elements = [...elements, ...subItems]
 
   // уведомляем о всех срезах состояния стиля
   collectObservableStates(observableStates)
 
-  // строим формы для компонентов стиля
-
+  // на этом уровне существует выбора именованных стилей для всего элемента и разворачиваемые формы для всех подэлементов стиля
   return () => (
     <>
       {elements.map((Component, i) => (
-        <Component key={i} />
+        <Component key={`root_${i}`} />
       ))}
     </>
   )
