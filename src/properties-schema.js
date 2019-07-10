@@ -102,8 +102,6 @@ export default [
   entryPointSchema,
   visibilitySchema,
   scrollableSchema,
-  { type: 'divider' },
   orientationSchema,
-  { type: 'divider' },
   alignSchema
 ]

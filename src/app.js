@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { Component } from 'react'
 
 import styled, { createGlobalStyle } from 'styled-components'
 
@@ -14,6 +14,7 @@ import StyleService from './utils/StyleService'
 
 import { defaultTheme } from './uikit-default-theme'
 
+// для примера выделен view
 import propertiesSchema from './properties-schema'
 import stylesSchema from './styles-schema'
 
@@ -24,6 +25,7 @@ const namedStyles = [
 ]
 
 const styleService = new StyleService(defaultTheme)
+styleService.putStyles(namedStyles)
 
 const cleanPath = '/views/Example.json'
 
@@ -59,7 +61,9 @@ const rootStyle = { width: 300, height: '100%' }
 // TODO: было бы не плохо определять что выделен корнeвой View и для него не давать менять ID и только для него в схеме view показывать Public и EntryPoint (это просто потому что нет понятия Screen для элементов)
 // TODO: до вызова PropertiesInspector определяем  тип и вложенность и если это View то в копии схемы делаем  id disabled и доабаляемя после id public и entryPoint
 
-export default class App extends PureComponent {
+export default class App extends Component {
+  state = { content: file.content }
+
   renderThumbVertical = props => {
     return <div {...props} className="thumb-vertical" style={{ backgroundColor: '#ffffff80', borderRadius: '3px' }} />
   }
@@ -85,6 +89,24 @@ export default class App extends PureComponent {
             propertiesDidChange={file.propertiesDidChange}
           />
         </Scrollbars>
+        <button
+          style={{ position: 'absolute', left: 300, top: 0 }}
+          onClick={() => {
+            // как вариант сюда можно передавать схемы свойств типов и по ним глубоко убирать из объекта свойства, равные дефолтным значениям (для уменьшения размера отсериализованных данных)
+            // для стилей не определены дефолтные значения - для них минификации не будет
+            file.serializeObjectProperties()
+            this.setState({ content: file.content })
+          }}
+        >
+          SERIALIZE
+        </button>
+        <textarea
+          readOnly
+          value={this.state.content}
+          rows={500}
+          cols={80}
+          style={{ position: 'absolute', left: 300, top: 20 }}
+        />
       </>
     )
   }
