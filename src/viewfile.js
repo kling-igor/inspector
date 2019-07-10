@@ -154,12 +154,13 @@ export class ViewFile {
     }
   }
 
-  constructor(filePath, buffer, styleService, namedStyles, dirty = false) {
+  constructor(filePath, buffer, styleService, /*namedStyles, TODO: поправить в оригинале*/ dirty = false) {
     this.filePath = filePath
 
     this.styleService = styleService
 
-    this.namedStyles = namedStyles
+    // TODO: поправить в оригинале
+    const namedStyles = Object.keys(styleService.styleCache)
 
     this.openingTime = moment()
 
@@ -171,6 +172,27 @@ export class ViewFile {
       delete parsedJSON.name
 
       this.setContent(parsedJSON)
+
+      // const traverse = element => {
+      //   const { styles } = element
+      //   // верхнеуровневая фильтрация
+      //   element.styles = styles.filter(item => {
+      //     if (typeof item === 'string') {
+      //       if (namedStyles.includes(item)) return true
+      //       return false
+      //     }
+
+      //     return true
+      //   })
+
+      //   element.styles = element.styles.map(style => {
+      //     if (typeof style)
+      //   })
+      // }
+
+      // traverse(parsedJSON)
+
+      // тут нужно в стилях отбросить именованные стили которых нет в namedStyles
 
       // базовое значение объекта, которое прогоняется через immer
       this.viewTreeState = appendNodePath(parsedJSON)

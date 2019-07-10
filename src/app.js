@@ -40,6 +40,7 @@ const viewState = {
   styles: [
     {
       self: [
+        'p10',
         {
           width: '100%',
           height: '100%',

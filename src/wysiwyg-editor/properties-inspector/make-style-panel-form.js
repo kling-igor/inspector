@@ -32,12 +32,15 @@ const onNamedStylesSelectChange = (namedStylesState, propertiesDidChange) => col
 }
 
 // список именованных стилей, показываемый в компоненте MultiSelect при первоначальном открытии
+// элементы, не найденные в namedStyles
 const filterInitialNamedStyles = namedStyles => stylesArray => {
   return stylesArray.reduce((accum, item) => {
     if (typeof item !== 'string') return accum
     // отбрасывать обнаруживаемые именованные стили которых нет в списке namedStyles
-    if (!namedStyles.includes(item)) return accum
-    return [...accum, item]
+    const found = namedStyles.found(({ name }) => name === item)
+    if (!found) return accum
+
+    return [...accum, item.name]
   }, [])
 }
 
@@ -60,11 +63,12 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
   const stylesObject = stilesAsObjects.reduce((obj, item) => deepmerge(obj, item), {})
 
   /**
-   * создаение форм для одного элемента стиля
+   * создание раздела (DIMENSIONS, MARGINS, PADDINGS, etc) в рамках одного ключа стиля
    * @param {Array} settingsSchema - схема элементов формы
    * @param {String} elementKey - имя подэлемента стиля к которому относятся настройки (например, self или listItem.text)
    */
   const makeStyleFormPane = (settingsSchema, elementKey, title) => {
+    console.log('** makeStyleFormPane:', elementKey)
     // заглушка на случай когда схема стиля пустая (компонент в разработке - еще не принято решение какие аттрибуты конфигурируются)
     if (Array.isArray(settingsSchema) && settingsSchema.length === 0) {
       const state = observable({})
@@ -84,26 +88,6 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
 
     const Form = makeForm(settingsSchema, propertiesDidChange)
 
-    const hasNamedStyles = !!settingsSchema.find(item => item.type === TYPE.NAMEDSTYLESELECT)
-
-    if (hasNamedStyles) {
-      const initialNamedStyles = filterInitialNamedStyles(namedStyles)(elementStyle)
-      const namedStylesState = observable(initialNamedStyles)
-      observableStates.push({ key: elementKey, state: namedStylesState })
-      return () => (
-        <>
-          <MultiSelect
-            items={namedStyles.map(item => item.name)}
-            initialItems={initialNamedStyles}
-            placeholderText="Select named style.."
-            noResultText="No named styles."
-            onSelectChange={onNamedStylesSelectChange(namedStylesState, propertiesDidChange)}
-          />
-          <Form state={state} />
-        </>
-      )
-    }
-
     return () => (
       <>
         {!!title && <TitleStyle className="bp3-text-muted">{title}</TitleStyle>}
@@ -114,13 +98,17 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
 
   // создание разворачиваемой формы для элемента стиля (self, label, etc)
   const makeStyleElementForm = (subitems, styleKey, title) => {
+    console.log('** makeStyleElementForm:', styleKey)
     let elements = []
     // если указаны элементные именованные стили (как правило, должны)
     const hasNamedStyles = !!subitems.find(item => item === 'namedstyleselect')
+    console.log('HAS NAMED STYLES:', hasNamedStyles)
     if (hasNamedStyles) {
       const initialNamedStyles = filterInitialNamedStyles(namedStyles)(styles)
       const namedStylesState = observable(initialNamedStyles)
       observableStates.push({ key: styleKey, state: namedStylesState })
+
+      // TODO: тут нужно оставить только простые именванные стили (для items)
 
       // первый элемент формы будет элемент выбора именованного стиля для подэлемента стиля
       elements.push(() => (
@@ -168,14 +156,20 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
     return () => <Collapsible />
   }
 
+  console.log('** ENTRY POINT')
+
   let elements = []
 
   // если указаны корневые именованные стили (как правило, должны)
   const hasNamedStyles = !!schema.find(item => item === 'namedstyleselect')
+  console.log('HAS NAMED STYLES:', hasNamedStyles)
   if (hasNamedStyles) {
     const initialNamedStyles = filterInitialNamedStyles(namedStyles)(styles)
     const namedStylesState = observable(initialNamedStyles)
     observableStates.push({ key: null, state: namedStylesState })
+
+    // TODO: тут нужно оставить только именванные стили которые подходят схеме стилей объекта
+    // т.е. содержат ключи которые есть в схеме стилей (простые именованные стили отбрасываются)
 
     // первый элемент формы будет элемент выбора именованного стиля для всего компонента
     elements.push(() => (
