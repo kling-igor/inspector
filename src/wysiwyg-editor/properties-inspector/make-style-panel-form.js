@@ -6,7 +6,6 @@ import { lensGet, isObject } from '../../utils'
 import makeForm from './make-form'
 import MultiSelect from './multiselect'
 import makeStyleModel from './make-style-model'
-import { TYPE } from '../interface-types'
 import { Divider } from './components'
 import { useCollapsible } from './collapsibe-header'
 
@@ -111,6 +110,24 @@ const stripNamedStyles = (styleCache, style, schema) => {
 
     return [...acc, item]
   }, [])
+}
+
+/**
+ * Рекурсивно чистит объект от неподходящих именованных стилей
+ * @param {Object} viewState - очищаемый объект (мутирует)
+ * @param {Object} schemes - словарь схем стилей для всех типов компонентов
+ * @param {Object} styleCache - кеш стилей
+ */
+const cleanInvalidNamedStyles = (viewState, schemes, styleCache) => {
+  const type = viewState.displayType || viewState.type
+
+  const schema = schemes[type]
+
+  viewState.styles = stripNamedStyles(styleCache, element.styles, schema)
+
+  if (viewState.elements && viewState.elements.length > 0) {
+    viewState.elements.forEach(childViewState => cleanInvalidNamedStyles(childViewState, schemes, styleCache))
+  }
 }
 
 /**
@@ -298,7 +315,6 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
 
   // если в схеме указаны корневые именованные стили (как правило, должны)
   const hasNamedStyles = !!schema.find(item => item === 'namedstyleselect')
-  console.log('HAS NAMED STYLES:', hasNamedStyles)
   if (hasNamedStyles) {
     // получаем список имен именованных стилей, подходящих компоненту даного типа
     const acceptableNamedStyles = filterNamedStyles(styleCache, schema)
