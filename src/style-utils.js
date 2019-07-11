@@ -58,3 +58,90 @@ const mergeStyle = (merged, { key, style }) => {
 }
 
 export const mergeStyleSlices = styleSlices => styleSlices.reduce(mergeStyle, [])
+
+// получение ключей элементов стиля в описании схемы
+export const getStyleKeys = styleSchema => {
+  return styleSchema.reduce((acc, item) => {
+    if (typeof item !== 'string') {
+      return [...acc, item.styleKey]
+    }
+
+    return acc
+  }, [])
+}
+
+export const isStyleMatchesSchema = (styleKeys, schemaKeys) => {
+  for (const styleKey of styleKeys) {
+    if (!schemaKeys.includes(styleKey)) return false
+  }
+
+  return true
+}
+
+/**
+ * Рекурсивная фильтрация именованных стилей
+ * @param {Object} styleCache - кеш именованных стилей
+ * @param {Array} style - поле стилей компонента
+ * @param {Array} schema - схема стилей компонента
+ * @returns {Array} - стили, очищенные от неподходящих именованных стилей
+ */
+export const stripNamedStyles = (styleCache, style, schema) => {
+  const namedStyleKeys = Object.keys(styleCache[item])
+
+  return style.reduce((acc, item) => {
+    if (typeof item === 'string') {
+      if (!namedStyleKeys.includes(item)) {
+        return acc
+      }
+
+      if (schema) {
+        const schemaKeys = getStyleKeys(schema)
+
+        // если в namedStyleKeys есть хоть один ключ которого нет в schemaKeys, то отбрасываем этот стиль
+        if (!isStyleMatchesSchema(namedStyleKeys, schemaKeys)) {
+          return acc
+        }
+      } else {
+        // тут если проверка именованного стиля внутри подэлемента
+        // нужна какая-то эвристика чтобы понять что именованный стиль имеет отношение непосредственно к элементу а не к сложному компоненту в целом
+        // можно проанализировать наличие ключей, свойственных схеме
+
+        // если в namedStyleKeys есть хоть один ключ который бывает в схемах, то отбрасываем этот стиль т.к. это сложный стиль и он не должен был бы быть на этом уровне
+        if (isStyleMatchesSchema(namedStyleKeys, elementNames)) {
+          return acc
+        }
+      }
+    } else {
+      // наличие схемы как признак того на каком уровне вложенности мы находимся
+      if (schema) {
+        // console.log('STRIP SUBELEMENTS STYLES', item)
+        // иначе это объект с возможно множеством ключей - каждый ключ это массив который также нужно очистить
+        for (const [elementKey, elementStyle] of Object.entries(item)) {
+          item[elementKey] = stripNamedStyles(styleCache, elementStyle) // нужно не углубляться дальше конкретных стилей подэлементов стиля !!!
+        }
+
+        // console.log('STRIPPED:', item)
+      }
+    }
+
+    return [...acc, item]
+  }, [])
+}
+
+/**
+ * Рекурсивно чистит объект от неподходящих именованных стилей
+ * @param {Object} viewState - очищаемый объект (мутирует)
+ * @param {Object} schemes - словарь схем стилей для всех типов компонентов
+ * @param {Object} styleCache - кеш стилей
+ */
+export const cleanInvalidNamedStyles = (viewState, schemes, styleCache) => {
+  const type = viewState.displayType || viewState.type
+
+  const schema = schemes[type]
+
+  viewState.styles = stripNamedStyles(styleCache, element.styles, schema)
+
+  if (viewState.elements && viewState.elements.length > 0) {
+    viewState.elements.forEach(childViewState => cleanInvalidNamedStyles(childViewState, schemes, styleCache))
+  }
+}
