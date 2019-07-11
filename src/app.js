@@ -15,14 +15,24 @@ import StyleService from './utils/StyleService'
 import { defaultTheme } from './uikit-default-theme'
 
 // для примера выделен view
-import propertiesSchema from './properties-schema'
-import stylesSchema from './styles-schema'
+import viewPropertiesSchema from './properties-schema'
+import viewStylesSchema from './styles-schema'
 
 const namedStyles = [
   { name: 'p10', value: { padding: 10 } },
   { name: 'selfMargin10', value: { self: [{ margin: 10 }] } },
   { name: 'selfBlueBack', value: { self: [{ backgroundColor: 'blue' }] } }
 ]
+
+// словарь схем свойств viewState всех типов объектов (TODO: как его формировать в Vision ???)
+const propertiesSchemes = {
+  view: viewPropertiesSchema
+}
+
+// словарь схем стилей для всех типов объектов (TODO: как его формировать в Vision ???)
+const stylesSchemes = {
+  view: viewStylesSchema
+}
 
 const styleService = new StyleService(defaultTheme)
 styleService.putStyles(namedStyles)
@@ -38,10 +48,12 @@ const viewState = {
   align: 'center',
   orientation: 'horizontal',
   styles: [
+    'p10',
     'selfMargin10',
     {
       self: [
         'p10',
+        'selfMargin10',
         {
           width: '100%',
           height: '100%',
@@ -56,7 +68,14 @@ const viewState = {
 const content = JSON.stringify(viewState)
 
 // хендлер выбранного файла
-const file = new ViewFile(cleanPath, content, styleService /*, namedStyles TODO: УБРАТЬ!!!*/)
+const file = new ViewFile(
+  cleanPath,
+  content,
+  styleService,
+  propertiesSchemes,
+  stylesSchemes
+  /*, namedStyles TODO: УБРАТЬ!!!*/
+)
 
 const rootStyle = { width: 300, height: '100%' }
 
@@ -64,6 +83,7 @@ const rootStyle = { width: 300, height: '100%' }
 // TODO: до вызова PropertiesInspector определяем  тип и вложенность и если это View то в копии схемы делаем  id disabled и доабаляемя после id public и entryPoint
 
 export default class App extends Component {
+  // для отрисовки сериализованного значения
   state = { content: file.content }
 
   renderThumbVertical = props => {
@@ -71,6 +91,10 @@ export default class App extends Component {
   }
 
   render() {
+    console.log('selectedViewState:', file.selectedViewState)
+
+    const type = file.selectedViewState.displayType || file.selectedViewState.type
+
     return (
       <>
         <GlobalStyle />
@@ -84,8 +108,8 @@ export default class App extends Component {
         >
           <PropertiesInspector
             viewState={file.selectedViewState}
-            schema={propertiesSchema}
-            stylesSchema={stylesSchema}
+            schema={propertiesSchemes[type]}
+            stylesSchema={stylesSchemes[type]}
             styleCache={styleService.styleCache}
             coollectPropertiesStates={file.coollectPropertiesStates}
             propertiesDidChange={file.propertiesDidChange}

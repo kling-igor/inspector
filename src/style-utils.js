@@ -59,6 +59,38 @@ const mergeStyle = (merged, { key, style }) => {
 
 export const mergeStyleSlices = styleSlices => styleSlices.reduce(mergeStyle, [])
 
+// возможные ключи элементов стиля
+export const elementNames = [
+  'self',
+  'title',
+  'label',
+  'header',
+  'content',
+  'menu',
+  'menuItem',
+  'listItem',
+  'autocompleteInput',
+  'tab',
+  'icon',
+  'thumb',
+  'track',
+  'trackSwitched',
+  'text',
+  'hint',
+  'error',
+  'tabBar',
+  'tab',
+  'inkBar',
+  'sectionedListHeader',
+  'radiogroupItem',
+  'disabled',
+  'dropdownHeader',
+  'inputStyle',
+  'dateText',
+  'okLabel',
+  'cancelLabel'
+]
+
 // получение ключей элементов стиля в описании схемы
 export const getStyleKeys = styleSchema => {
   return styleSchema.reduce((acc, item) => {
@@ -86,11 +118,13 @@ export const isStyleMatchesSchema = (styleKeys, schemaKeys) => {
  * @returns {Array} - стили, очищенные от неподходящих именованных стилей
  */
 export const stripNamedStyles = (styleCache, style, schema) => {
-  const namedStyleKeys = Object.keys(styleCache[item])
+  const namedStyles = Object.keys(styleCache)
 
   return style.reduce((acc, item) => {
     if (typeof item === 'string') {
-      if (!namedStyleKeys.includes(item)) {
+      const namedStyleKeys = Object.keys(styleCache[item])
+
+      if (!namedStyles.includes(item)) {
         return acc
       }
 
@@ -139,7 +173,7 @@ export const cleanInvalidNamedStyles = (viewState, schemes, styleCache) => {
 
   const schema = schemes[type]
 
-  viewState.styles = stripNamedStyles(styleCache, element.styles, schema)
+  viewState.styles = stripNamedStyles(styleCache, viewState.styles, schema)
 
   if (viewState.elements && viewState.elements.length > 0) {
     viewState.elements.forEach(childViewState => cleanInvalidNamedStyles(childViewState, schemes, styleCache))

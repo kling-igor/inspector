@@ -11,39 +11,7 @@ import { useCollapsible } from './collapsibe-header'
 
 import styleSchemes from './style-schemes'
 
-import { getStyleKeys, isStyleMatchesSchema } from '../../style-utils'
-
-// возможные ключи элементов стиля
-const elementNames = [
-  'self',
-  'title',
-  'label',
-  'header',
-  'content',
-  'menu',
-  'menuItem',
-  'listItem',
-  'autocompleteInput',
-  'tab',
-  'icon',
-  'thumb',
-  'track',
-  'trackSwitched',
-  'text',
-  'hint',
-  'error',
-  'tabBar',
-  'tab',
-  'inkBar',
-  'sectionedListHeader',
-  'radiogroupItem',
-  'disabled',
-  'dropdownHeader',
-  'inputStyle',
-  'dateText',
-  'okLabel',
-  'cancelLabel'
-]
+import { getStyleKeys, isStyleMatchesSchema, elementNames } from '../../style-utils'
 
 /**
  * Отфильтровывает имена именованных стилей кеша, в соответствие  с предоставленной схемой стиля компонента

@@ -20,7 +20,7 @@ import { NONE, PALETTE, PLAYGROUND, ROOT, TRASH } from './wysiwyg-editor/dnd-typ
 
 import { getTreeNode, createNode, removeChildNode, appendNodePath, walkTree } from './node-utils'
 
-import { mergeStyleSlices } from './style-utils'
+import { mergeStyleSlices, cleanInvalidNamedStyles } from './style-utils'
 
 import { copyObject, cleanMergedStyles, recursiveCleanPathKeys, numberify } from './utils'
 
@@ -154,13 +154,19 @@ export class ViewFile {
     }
   }
 
-  constructor(filePath, buffer, styleService, /*namedStyles, TODO: поправить в оригинале*/ dirty = false) {
+  constructor(
+    filePath,
+    buffer,
+    styleService,
+    propertiesSchemes,
+    stylesSchemes,
+    /*namedStyles, TODO: поправить в оригинале*/ dirty = false
+  ) {
     this.filePath = filePath
 
     this.styleService = styleService
 
-    // TODO: поправить в оригинале
-    const namedStyles = Object.keys(styleService.styleCache)
+    this.propertiesSchemes = propertiesSchemes
 
     this.openingTime = moment()
 
@@ -171,32 +177,9 @@ export class ViewFile {
       delete parsedJSON.uptime
       delete parsedJSON.name
 
+      cleanInvalidNamedStyles(parsedJSON, stylesSchemes, styleService.styleCache)
+
       this.setContent(parsedJSON)
-
-      // TODO: глубокая очистка объекта от именованных стилей, которые не подходят по схемам
-
-      // соответствующий код нужно вытащить из инспектора чтобы  он был доступен
-
-      // const traverse = element => {
-      //   const { styles } = element
-      //   // верхнеуровневая фильтрация
-      //   element.styles = styles.filter(item => {
-      //     if (typeof item === 'string') {
-      //       if (namedStyles.includes(item)) return true
-      //       return false
-      //     }
-
-      //     return true
-      //   })
-
-      //   element.styles = element.styles.map(style => {
-      //     if (typeof style)
-      //   })
-      // }
-
-      // traverse(parsedJSON)
-
-      // тут нужно в стилях отбросить именованные стили которых нет в namedStyles
 
       // базовое значение объекта, которое прогоняется через immer
       this.viewTreeState = appendNodePath(parsedJSON)
