@@ -33,7 +33,9 @@ export default class extends Component {
   }
 
   handleClear = () => {
-    this.setState({ items: [] })
+    this.setState({ items: [] }, () => {
+      if (this.props.onSelectChange) this.props.onSelectChange(this.state.items)
+    })
   }
 
   selectItem = item => {
@@ -59,6 +61,8 @@ export default class extends Component {
   }
 
   handleItemSelect = item => {
+    console.log('ON ITEM SELECT!!!:', item)
+
     if (this.isItemSelected(item)) {
       this.deselectItem(this.getSelectedItemIndex(item))
     } else {
@@ -89,6 +93,7 @@ export default class extends Component {
           items={this.props.items}
           itemRenderer={this.renderItem}
           noResults={<MenuItem disabled={true} text={this.props.noResultText} />}
+          resetOnQuery={true}
           onItemSelect={this.handleItemSelect}
           popoverProps={{ minimal: true }}
           tagRenderer={this.renderTag}
