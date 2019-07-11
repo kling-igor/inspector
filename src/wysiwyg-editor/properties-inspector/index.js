@@ -14,7 +14,7 @@ const RootStyle = styled.div`
 `
 
 export const PropertiesInspector = observer(
-  ({ viewState, namedStyles, schema, stylesSchema, coollectPropertiesStates, propertiesDidChange }) => {
+  ({ viewState, styleCache, schema, stylesSchema, coollectPropertiesStates, propertiesDidChange }) => {
     // отделяем стили от других свойств объекта
     const { styles, ...rest } = viewState
 
@@ -54,7 +54,7 @@ export const PropertiesInspector = observer(
         coollectPropertiesStates(selfState, styleStates)
       }
 
-      const StylePanes = makeStyleForms(stylesSchema, styles, namedStyles, coollectStyleStates, propertiesDidChange)
+      const StylePanes = makeStyleForms(stylesSchema, styles, styleCache, coollectStyleStates, propertiesDidChange)
 
       return (
         <RootStyle className="bp3-dark">

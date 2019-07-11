@@ -65,20 +65,22 @@ const isStyleMatchesSchema = (styleKeys, schemaKeys) => {
 // фильтрация стиля от неподходящих именованных стилей
 /**
  * Рекурсивная фильтрация именованных стилей
+ * @param {Object} styleCache - кеш именованных стилей
  * @param {Array} style - поле стилей компонента
  * @param {Array} schema - схема стилей компонента
  * @returns {Array} - стили, очищенные от неподходящих именованных стилей
  */
-const stripNamedStyles = (style, schema) => {
+const stripNamedStyles = (styleCache, style, schema) => {
+  const namedStyleKeys = Object.keys(styleCache[item])
+
   return style.reduce((acc, item) => {
     if (typeof item === 'string') {
-      if (!namedStyles.includes(item)) {
+      if (!namedStyleKeys.includes(item)) {
         return acc
       }
 
       if (schema) {
         const schemaKeys = getStyleKeys(schema)
-        const namedStyleKeys = Object.keys(styleCache[item])
 
         // если в namedStyleKeys есть хоть один ключ которого нет в schemaKeys, то отбрасываем этот стиль
         if (!isStyleMatchesSchema(namedStyleKeys, schemaKeys)) {
@@ -88,8 +90,6 @@ const stripNamedStyles = (style, schema) => {
         // тут если проверка именованного стиля внутри подэлемента
         // нужна какая-то эвристика чтобы понять что именованный стиль имеет отношение непосредственно к элементу а не к сложному компоненту в целом
         // можно проанализировать наличие ключей, свойственных схеме
-
-        const namedStyleKeys = Object.keys(styleCache[item])
 
         // если в namedStyleKeys есть хоть один ключ который бывает в схемах, то отбрасываем этот стиль т.к. это сложный стиль и он не должен был бы быть на этом уровне
         if (isStyleMatchesSchema(namedStyleKeys, elementNames)) {
@@ -102,7 +102,7 @@ const stripNamedStyles = (style, schema) => {
         // console.log('STRIP SUBELEMENTS STYLES', item)
         // иначе это объект с возможно множеством ключей - каждый ключ это массив который также нужно очистить
         for (const [elementKey, elementStyle] of Object.entries(item)) {
-          item[elementKey] = stripNamedStyles(elementStyle) // нужно не углубляться дальше конкретных стилей подэлементов стиля !!!
+          item[elementKey] = stripNamedStyles(styleCache, elementStyle) // нужно не углубляться дальше конкретных стилей подэлементов стиля !!!
         }
 
         // console.log('STRIPPED:', item)
@@ -124,17 +124,14 @@ const stripNamedStyles = (style, schema) => {
 const filterNamedStyles = (styleCache, schema) => {
   const filtered = []
 
-  if (schema) {
-    // имена подэлементов стиля в соответствие со схемой стиля конкретного типа элемента
-    const styleSchemaKeys = getStyleKeys(schema)
-    for (const [name, style] of Object.entries(styleCache)) {
+  for (const [name, style] of Object.entries(styleCache)) {
+    if (schema) {
+      // имена подэлементов стиля в соответствие со схемой стиля конкретного типа элемента
+      const styleSchemaKeys = getStyleKeys(schema)
       if (isStyleMatchesSchema(Object.keys(style), styleSchemaKeys)) {
         filtered.push(name)
       }
-    }
-  } else {
-    // если схема не указана, то нужно проверить на НЕСООТВЕТСТВИЕ стилям подэлементов
-    for (const [name, style] of Object.entries(styleCache)) {
+    } else {
       if (!isStyleMatchesSchema(Object.keys(style), elementNames)) {
         filtered.push(name)
       }
@@ -164,27 +161,26 @@ const onNamedStylesSelectChange = (namedStylesState, propertiesDidChange) => col
 }
 
 // список именованных стилей, показываемый в компоненте MultiSelect при первоначальном открытии
-// элементы, не найденные в namedStyles
-const filterInitialNamedStyles = namedStyles => stylesArray => {
-  return stylesArray.reduce((accum, item) => {
-    if (typeof item !== 'string') return accum
-    // отбрасывать обнаруживаемые именованные стили которых нет в списке namedStyles
-    const found = namedStyles.found(({ name }) => name === item)
-    if (!found) return accum
-
-    return [...accum, item.name]
+const filterInitialNamedStyles = (namedStyleNames, style) => {
+  return style.reduce((accum, item) => {
+    if (typeof item === 'string' && namedStyleNames.includes(item)) {
+      return [...accum, item.name]
+    }
+    return accum
   }, [])
 }
 
 /**
  * Создает компонент многосекционной формы редактирования стилей
  * @param {Object} schema - схема стилей объекта (у каждого типа обычно своя)
- * @param {Array} styles - собственно массив стилей объекта (сначала именованные, потои идет объект стилей элементов компонента)
- * @param {String[]} namedStyles - список доступных именованных стилей
+ * @param {Array} styles - собственно массив стилей объекта (сначала именованные, потом идет объект стилей элементов компонента)
+ * @param {Object} styleCache - кеш стилей
  * @param {Function} collectObservableStates - колбек для того чтобы сообщить о всех observable чтобы из них можно было получить данные для сериализации
  * @param {Function} propertiesDidChange - колбек, вызываемый формой при изменении любого поля формы
  */
-export const makeStyleForms = (schema, styles, namedStyles = [], collectObservableStates, propertiesDidChange) => {
+export const makeStyleForms = (schema, styles, styleCache, collectObservableStates, propertiesDidChange) => {
+  console.log('STYLE CACHE:', styleCache)
+
   // тут будут накапливаться observable части стиля
   const observableStates = []
 
@@ -229,6 +225,12 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
   }
 
   // создание разворачиваемой формы для элемента стиля (self, label, etc)
+  /**
+   *
+   * @param {Array} subitems - схемы стилей именованных элементов (self, label, etc) компонента
+   * @param {String} styleKey - ключ
+   * @param {String} title - заголовок
+   */
   const makeStyleElementForm = (subitems, styleKey, title) => {
     console.log('** makeStyleElementForm:', styleKey)
     let elements = []
@@ -236,16 +238,22 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
     const hasNamedStyles = !!subitems.find(item => item === 'namedstyleselect')
     console.log('HAS NAMED STYLES:', hasNamedStyles)
     if (hasNamedStyles) {
-      const initialNamedStyles = filterInitialNamedStyles(namedStyles)(styles)
+      // только примитивны стили останутся (т.е. не указана схеме стиля при вызове фильтрации)
+      const acceptableNamedStyles = filterNamedStyles(styleCache)
+
+      // получаем объект отбросив корневые именованные стили
+      const elementsStyleObject = styles.filter(item => typeof item !== 'string')[0]
+      // получаем стили элемента по возможно комбинированному ключу
+      const elementStyles = lensGet(styleKey, elementsStyleObject)
+
+      const initialNamedStyles = filterInitialNamedStyles(acceptableNamedStyles, elementStyles)
       const namedStylesState = observable(initialNamedStyles)
       observableStates.push({ key: styleKey, state: namedStylesState })
-
-      // TODO: тут нужно оставить только простые именванные стили (для items)
 
       // первый элемент формы будет элемент выбора именованного стиля для подэлемента стиля
       elements.push(() => (
         <MultiSelect
-          items={namedStyles.map(item => item.name)}
+          items={acceptableNamedStyles}
           initialItems={initialNamedStyles}
           placeholderText={`Select named style for '${styleKey}'...`}
           noResultText="No named styles."
@@ -292,21 +300,22 @@ export const makeStyleForms = (schema, styles, namedStyles = [], collectObservab
 
   let elements = []
 
-  // если указаны корневые именованные стили (как правило, должны)
+  // если в схеме указаны корневые именованные стили (как правило, должны)
   const hasNamedStyles = !!schema.find(item => item === 'namedstyleselect')
   console.log('HAS NAMED STYLES:', hasNamedStyles)
   if (hasNamedStyles) {
-    const initialNamedStyles = filterInitialNamedStyles(namedStyles)(styles)
+    // получаем список имен именованных стилей, подходящих компоненту даного типа
+    const acceptableNamedStyles = filterNamedStyles(styleCache, schema)
+
+    // названия именованных стилей, которые должны быть уже отображены в форме
+    const initialNamedStyles = filterInitialNamedStyles(acceptableNamedStyles, styles)
     const namedStylesState = observable(initialNamedStyles)
     observableStates.push({ key: null, state: namedStylesState })
-
-    // TODO: тут нужно оставить только именванные стили которые подходят схеме стилей объекта
-    // т.е. содержат ключи которые есть в схеме стилей (простые именованные стили отбрасываются)
 
     // первый элемент формы будет элемент выбора именованного стиля для всего компонента
     elements.push(() => (
       <MultiSelect
-        items={namedStyles.map(item => item.name)}
+        items={acceptableNamedStyles}
         initialItems={initialNamedStyles}
         placeholderText="Select named style for entire element..."
         noResultText="No named styles."

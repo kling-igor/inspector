@@ -55,7 +55,7 @@ const viewState = {
 const content = JSON.stringify(viewState)
 
 // хендлер выбранного файла
-const file = new ViewFile(cleanPath, content, styleService, namedStyles)
+const file = new ViewFile(cleanPath, content, styleService /*, namedStyles TODO: УБРАТЬ!!!*/)
 
 const rootStyle = { width: 300, height: '100%' }
 
@@ -85,13 +85,13 @@ export default class App extends Component {
             viewState={file.selectedViewState}
             schema={propertiesSchema}
             stylesSchema={stylesSchema}
-            namedStyles={namedStyles}
+            styleCache={styleService.styleCache}
             coollectPropertiesStates={file.coollectPropertiesStates}
             propertiesDidChange={file.propertiesDidChange}
           />
         </Scrollbars>
         <button
-          style={{ position: 'absolute', left: 300, top: 0 }}
+          style={{ position: 'absolute', left: 305, top: 0 }}
           onClick={() => {
             // как вариант сюда можно передавать схемы свойств типов и по ним глубоко убирать из объекта свойства, равные дефолтным значениям (для уменьшения размера отсериализованных данных)
             // для стилей не определены дефолтные значения - для них минификации не будет
@@ -106,7 +106,7 @@ export default class App extends Component {
           value={this.state.content}
           rows={500}
           cols={80}
-          style={{ position: 'absolute', left: 300, top: 20 }}
+          style={{ position: 'absolute', left: 305, top: 25 }}
         />
       </>
     )
