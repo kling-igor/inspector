@@ -20,7 +20,7 @@ const ButtonStyle = styled.img`
   z-index: 2;
   /* position: absolute; */
   cursor: pointer;
-  margin-left: 0px;
+  margin-left: -4px;
   margin-right: 4px;
 `
 
