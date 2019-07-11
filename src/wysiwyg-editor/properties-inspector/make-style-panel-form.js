@@ -12,6 +12,138 @@ import { useCollapsible } from './collapsibe-header'
 
 import styleSchemes from './style-schemes'
 
+// возможные ключи элементов стиля
+const elementNames = [
+  'self',
+  'title',
+  'label',
+  'header',
+  'content',
+  'menu',
+  'menuItem',
+  'listItem',
+  'autocompleteInput',
+  'tab',
+  'icon',
+  'thumb',
+  'track',
+  'trackSwitched',
+  'text',
+  'hint',
+  'error',
+  'tabBar',
+  'tab',
+  'inkBar',
+  'sectionedListHeader',
+  'radiogroupItem',
+  'disabled',
+  'dropdownHeader',
+  'inputStyle',
+  'dateText',
+  'okLabel',
+  'cancelLabel'
+]
+
+// получение ключей элементов стиля в описании схемы
+const getStyleKeys = styleSchema =>
+  styleSchema.reduce((acc, item) => {
+    if (typeof item !== 'string') {
+      return [...acc, item.styleKey]
+    }
+
+    return acc
+  }, [])
+
+const isStyleMatchesSchema = (styleKeys, schemaKeys) => {
+  for (const styleKey of styleKeys) {
+    if (!schemaKeys.includes(styleKey)) return false
+  }
+
+  return true
+}
+
+// фильтрация стиля от неподходящих именованных стилей
+/**
+ * Рекурсивная фильтрация именованных стилей
+ * @param {Array} style - поле стилей компонента
+ * @param {Array} schema - схема стилей компонента
+ * @returns {Array} - стили, очищенные от неподходящих именованных стилей
+ */
+const stripNamedStyles = (style, schema) => {
+  return style.reduce((acc, item) => {
+    if (typeof item === 'string') {
+      if (!namedStyles.includes(item)) {
+        return acc
+      }
+
+      if (schema) {
+        const schemaKeys = getStyleKeys(schema)
+        const namedStyleKeys = Object.keys(styleCache[item])
+
+        // если в namedStyleKeys есть хоть один ключ которого нет в schemaKeys, то отбрасываем этот стиль
+        if (!isStyleMatchesSchema(namedStyleKeys, schemaKeys)) {
+          return acc
+        }
+      } else {
+        // тут если проверка именованного стиля внутри подэлемента
+        // нужна какая-то эвристика чтобы понять что именованный стиль имеет отношение непосредственно к элементу а не к сложному компоненту в целом
+        // можно проанализировать наличие ключей, свойственных схеме
+
+        const namedStyleKeys = Object.keys(styleCache[item])
+
+        // если в namedStyleKeys есть хоть один ключ который бывает в схемах, то отбрасываем этот стиль т.к. это сложный стиль и он не должен был бы быть на этом уровне
+        if (isStyleMatchesSchema(namedStyleKeys, elementNames)) {
+          return acc
+        }
+      }
+    } else {
+      // наличие схемы как признак того на каком уровне вложенности мы находимся
+      if (schema) {
+        // console.log('STRIP SUBELEMENTS STYLES', item)
+        // иначе это объект с возможно множеством ключей - каждый ключ это массив который также нужно очистить
+        for (const [elementKey, elementStyle] of Object.entries(item)) {
+          item[elementKey] = stripNamedStyles(elementStyle) // нужно не углубляться дальше конкретных стилей подэлементов стиля !!!
+        }
+
+        // console.log('STRIPPED:', item)
+      }
+    }
+
+    return [...acc, item]
+  }, [])
+}
+
+/**
+ * Отфильтровывает имена именованных стилей кеша, в соответствие  с предоставленной схемой стиля компонента
+ * Остаются только те стили, которые вписываются в схему
+ * Если схема не указана - останутся только элементарные стили - сложные будут отброшены
+ * @param {Object} styleCache - кеш стилей, где ключ - имя стиля, значение - описание
+ * @param {Array} schema - схема стилей компонентов
+ * @returns {String[]} - имена стилей, прошедших отбор
+ */
+const filterNamedStyles = (styleCache, schema) => {
+  const filtered = []
+
+  if (schema) {
+    // имена подэлементов стиля в соответствие со схемой стиля конкретного типа элемента
+    const styleSchemaKeys = getStyleKeys(schema)
+    for (const [name, style] of Object.entries(styleCache)) {
+      if (isStyleMatchesSchema(Object.keys(style), styleSchemaKeys)) {
+        filtered.push(name)
+      }
+    }
+  } else {
+    // если схема не указана, то нужно проверить на НЕСООТВЕТСТВИЕ стилям подэлементов
+    for (const [name, style] of Object.entries(styleCache)) {
+      if (!isStyleMatchesSchema(Object.keys(style), elementNames)) {
+        filtered.push(name)
+      }
+    }
+  }
+
+  return filtered
+}
+
 const TitleStyle = styled.div`
   -webkit-app-region: no-drag;
   -webkit-touch-callout: none;

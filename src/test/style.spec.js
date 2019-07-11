@@ -82,7 +82,7 @@ const elementNames = [
   'cancelLabel'
 ]
 
-// получение ключе элементов стиля в описании схемы
+// получение ключей элементов стиля в описании схемы
 const getStyleKeys = styleSchema =>
   styleSchema.reduce((acc, item) => {
     if (typeof item !== 'string') {
