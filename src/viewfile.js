@@ -58,7 +58,7 @@ const calcTreeHash = root => {
 
     const visibility = visible == null ? true : visible
 
-    console.log(`path:${path} type:${type} displayType:${displayType} id:${id}`)
+    // console.log(`path:${path} type:${type} displayType:${displayType} id:${id}`)
 
     spark.append(path)
     if (displayType) {
@@ -506,7 +506,6 @@ export class ViewFile {
   // сохранение извне знаний об объектах свойств компонента и его стилей
   @action.bound
   coollectPropertiesStates = (properties, styles) => {
-    console.log(`COLLECT PROPS AND SYLES: PROPS:${JSON.stringify(properties)}`)
     this.selectedComponentProperties = properties
     this.selectedComponentStyles = styles
   }

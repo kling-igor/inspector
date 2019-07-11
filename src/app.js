@@ -91,8 +91,6 @@ export default class App extends Component {
   }
 
   render() {
-    console.log('selectedViewState:', file.selectedViewState)
-
     const type = file.selectedViewState.displayType || file.selectedViewState.type
 
     return (
