@@ -164,7 +164,7 @@ const onNamedStylesSelectChange = (namedStylesState, propertiesDidChange) => col
 const filterInitialNamedStyles = (namedStyleNames, style) => {
   return style.reduce((accum, item) => {
     if (typeof item === 'string' && namedStyleNames.includes(item)) {
-      return [...accum, item.name]
+      return [...accum, item]
     }
     return accum
   }, [])
@@ -179,8 +179,6 @@ const filterInitialNamedStyles = (namedStyleNames, style) => {
  * @param {Function} propertiesDidChange - колбек, вызываемый формой при изменении любого поля формы
  */
 export const makeStyleForms = (schema, styles, styleCache, collectObservableStates, propertiesDidChange) => {
-  console.log('STYLE CACHE:', styleCache)
-
   // тут будут накапливаться observable части стиля
   const observableStates = []
 
@@ -196,7 +194,6 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
    * @param {String} elementKey - имя подэлемента стиля к которому относятся настройки (например, self или listItem.text)
    */
   const makeStyleFormPane = (settingsSchema, elementKey, title) => {
-    console.log('** makeStyleFormPane:', elementKey)
     // заглушка на случай когда схема стиля пустая (компонент в разработке - еще не принято решение какие аттрибуты конфигурируются)
     if (Array.isArray(settingsSchema) && settingsSchema.length === 0) {
       const state = observable({})
@@ -232,11 +229,10 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
    * @param {String} title - заголовок
    */
   const makeStyleElementForm = (subitems, styleKey, title) => {
-    console.log('** makeStyleElementForm:', styleKey)
     let elements = []
     // если указаны элементные именованные стили (как правило, должны)
     const hasNamedStyles = !!subitems.find(item => item === 'namedstyleselect')
-    console.log('HAS NAMED STYLES:', hasNamedStyles)
+
     if (hasNamedStyles) {
       // только примитивны стили останутся (т.е. не указана схеме стиля при вызове фильтрации)
       const acceptableNamedStyles = filterNamedStyles(styleCache)
@@ -296,7 +292,7 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
     return () => <Collapsible />
   }
 
-  console.log('** ENTRY POINT')
+  // entry point
 
   let elements = []
 
@@ -309,6 +305,7 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
 
     // названия именованных стилей, которые должны быть уже отображены в форме
     const initialNamedStyles = filterInitialNamedStyles(acceptableNamedStyles, styles)
+
     const namedStylesState = observable(initialNamedStyles)
     observableStates.push({ key: null, state: namedStylesState })
 

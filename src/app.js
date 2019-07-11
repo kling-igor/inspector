@@ -38,6 +38,7 @@ const viewState = {
   align: 'center',
   orientation: 'horizontal',
   styles: [
+    'selfMargin10',
     {
       self: [
         'p10',
