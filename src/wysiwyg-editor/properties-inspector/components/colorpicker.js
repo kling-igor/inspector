@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { SketchPicker } from 'react-color'
-import { Label } from '@blueprintjs/core'
+import { Label, Portal } from '@blueprintjs/core'
 
 const styles = {
   swatch: {
@@ -25,7 +25,7 @@ const styles = {
   },
   popover: {
     position: 'absolute',
-    zIndex: '2'
+    zIndex: '9999'
   },
   cover: {
     position: 'fixed',
@@ -55,11 +55,14 @@ class ColorPicker extends Component {
   }
 
   handleClick = event => {
+    console.log('pageX:', event.pageX)
+    console.log('pageY:', event.pageY)
+
     if (event.altKey) {
       this.setState({ color: null, pickerShown: false })
       this.onSelect(null)
     } else {
-      this.setState({ pickerShown: !this.state.pickerShown })
+      this.setState({ pickerShown: !this.state.pickerShown, x: event.pageX, y: event.pageY })
     }
   }
 
@@ -72,6 +75,9 @@ class ColorPicker extends Component {
     this.onSelect(this.state.color)
   }
 
+  // https://popper.js.org/popper-documentation.html
+  // https://github.com/FezVrasta/react-popper
+  // https://medium.com/@g1zmo/popper-js-react-562193a98c66
   render() {
     const { color } = this.state
 
@@ -96,13 +102,15 @@ class ColorPicker extends Component {
           )}
         </div>
         {this.state.pickerShown ? (
-          <div style={styles.popover}>
+          <Portal>
             <div style={styles.cover} onClick={this.handleClose} />
             <SketchPicker
-              // width={200}
               styles={{
                 picker: {
-                  // width: 200,
+                  position: 'absolute',
+                  left: 25 /*this.state.x || 0*/,
+                  top: this.state.y || 0,
+                  width: 250,
                   backgroundColor: '#A7B6C2',
                   padding: '10px 10px 0',
                   boxSizing: 'initial',
@@ -115,7 +123,7 @@ class ColorPicker extends Component {
               onChange={this.handleChange}
               presetColors={[]}
             />
-          </div>
+          </Portal>
         ) : null}
       </div>
     )

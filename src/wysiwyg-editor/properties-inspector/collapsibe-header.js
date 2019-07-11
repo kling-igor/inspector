@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { Collapse } from '@blueprintjs/core'
 
@@ -9,8 +9,6 @@ const HeaderStyle = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  /* background: magenta;
-  color: white; */
 `
 
 const ButtonStyle = styled.img`
@@ -32,29 +30,29 @@ const TitleStyle = styled.span`
   user-select: none;
 `
 
-export const useCollapsible = (title, Component, expanded = true) =>
-  class extends PureComponent {
-    state = {
-      isOpen: expanded
-    }
+const HeaderWithExpandoArrow = ({ title, toggle, expanded }) => {
+  const buttonImage = expanded ? './assets/ui/expando_expanded.svg' : './assets/ui/expando_collapsed.svg'
+  return (
+    <HeaderStyle onClick={toggle}>
+      <ButtonStyle draggable={false} src={buttonImage} width={16} height={16} />
+      <TitleStyle className="bp3-text-muted">{title}</TitleStyle>
+    </HeaderStyle>
+  )
+}
 
-    toggle = () => {
-      this.setState(({ isOpen }) => ({ isOpen: !isOpen }))
-    }
+export const useCollapsible = (title, Component, expandedByDefault = true, Header = HeaderWithExpandoArrow) => () => {
+  const [expanded, setExpanded] = useState(expandedByDefault)
 
-    render() {
-      const buttonImage = this.state.isOpen ? './assets/ui/expando_expanded.svg' : './assets/ui/expando_collapsed.svg'
-
-      return (
-        <>
-          <HeaderStyle onClick={this.toggle}>
-            <ButtonStyle draggable={false} src={buttonImage} width={16} height={16} />
-            <TitleStyle>{title}</TitleStyle>
-          </HeaderStyle>
-          <Collapse isOpen={this.state.isOpen}>
-            <Component />
-          </Collapse>
-        </>
-      )
-    }
+  const toggle = () => {
+    setExpanded(!expanded)
   }
+
+  return (
+    <>
+      <Header title={title} toggle={toggle} expanded={expanded} />
+      <Collapse isOpen={expanded} keepChildrenMounted>
+        <Component />
+      </Collapse>
+    </>
+  )
+}

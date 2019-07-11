@@ -41,13 +41,14 @@ const filterNamedStyles = (styleCache, schema) => {
   return filtered
 }
 
-const TitleStyle = styled.div`
-  -webkit-app-region: no-drag;
-  -webkit-touch-callout: none;
-  user-select: none;
-  text-align: right;
-  text-transform: uppercase;
-`
+// const TitleStyle = styled.div`
+//   -webkit-app-region: no-drag;
+//   -webkit-touch-callout: none;
+//   user-select: none;
+//   text-align: right;
+//   text-transform: uppercase;
+//   cursor: pointer;
+// `
 
 const StylesLabelStyle = styled.p`
   -webkit-app-region: no-drag;
@@ -105,7 +106,7 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
     // получаем стиль для подэлемента (self, title, etc...)
     const elementStyle = lensGet(elementKey, stylesObject)
 
-    // делаем модель стиля - стиль-объект, наполненныей данными и заполненый дефолтными значениями. Все именованные стили из источника данных будут проигнорированы
+    // делаем модель стиля - стиль-объект, наполненный данными и заполненный дефолтными значениями. Все именованные стили из источника данных будут проигнорированы
     const styleModel = makeStyleModel(settingsSchema, elementStyle)
 
     const state = observable(styleModel)
@@ -113,12 +114,21 @@ export const makeStyleForms = (schema, styles, styleCache, collectObservableStat
 
     const Form = makeForm(settingsSchema, propertiesDidChange)
 
-    return () => (
-      <>
-        {!!title && <TitleStyle className="bp3-text-muted">{title}</TitleStyle>}
-        <Form state={state} />
-      </>
-    )
+    const FormComponent = () => <Form state={state} />
+
+    if (title) {
+      // const Header = ({ title, toggle }) => (
+      //   <TitleStyle className="bp3-text-muted" onClick={toggle}>
+      //     {title}
+      //   </TitleStyle>
+      // )
+
+      const Collapsible = useCollapsible(title, FormComponent, false)
+
+      return () => <Collapsible />
+    }
+
+    return FormComponent
   }
 
   // создание разворачиваемой формы для элемента стиля (self, label, etc)
