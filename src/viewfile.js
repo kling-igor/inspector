@@ -22,7 +22,7 @@ import { getTreeNode, createNode, removeChildNode, appendNodePath, walkTree } fr
 
 import { mergeStyleSlices, cleanInvalidNamedStyles } from './style-utils'
 
-import { copyObject, cleanMergedStyles, recursiveCleanPathKeys, numberify } from './utils'
+import { copyObject, cleanMergedStyles, recursiveCleanPathKeys, recursiveCleanDefaultValues, numberify } from './utils'
 
 // !!!
 // import renderScreen from './viewstate-renderer'
@@ -510,7 +510,7 @@ export class ViewFile {
     this.selectedComponentStyles = styles
   }
 
-  // сериализация свойст компонента и замена ими текущего состояния выделенного компонента
+  // сериализация свойств компонента и замена ими текущего состояния выделенного компонента
   @action.bound
   serializeObjectProperties = () => {
     this.propertiesHaveChanged = false
@@ -550,9 +550,11 @@ export class ViewFile {
       }
     )
 
-    const cleanedViewTreeState = recursiveCleanPathKeys(this.viewTreeState)
+    const pathFreeViewTreeState = recursiveCleanPathKeys(this.viewTreeState)
 
-    this.setContent(cleanedViewTreeState /*recursiveCleanPathKeys(this.viewTreeState)*/)
+    const defaultValuesFreeViewTreeState = recursiveCleanDefaultValues(pathFreeViewTreeState, this.propertiesSchemes)
+
+    this.setContent(defaultValuesFreeViewTreeState /*recursiveCleanPathKeys(this.viewTreeState)*/)
 
     this.setViewTree(this.viewTreeState)
   }

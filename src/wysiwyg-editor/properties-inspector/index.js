@@ -18,13 +18,10 @@ export const PropertiesInspector = observer(
     // отделяем стили от других свойств объекта
     const { styles, ...rest } = viewState
 
+    // конструируем форму редактирования свойств компонента в соответствие со схемой свойств
     const Form = makeForm(schema, propertiesDidChange)
 
-    // когда нужно будет реализовывать графики - то треш с сложными ключами свойств доберется и сюда
-
     // наполняем состояние аттрибутами из схемы со значениями по-умолчанию
-
-    // в соответствие со схемой
     for (const item of schema) {
       const { key, type } = item
       if (type === TYPE.DEVIDER) continue

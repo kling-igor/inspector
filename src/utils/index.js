@@ -81,6 +81,39 @@ export const recursiveCleanPathKeys = node => {
   return result
 }
 
+/**
+ * удаляем свойства, значения которых равны дефолтным значениям в схеме
+ * @param {Object} viewState - стейт компонента
+ * @param {Object} propertiesSchemes - схемы описания свойств для всех типов
+ * @returns {Object} копия стейта, очищенная от дефолтых свойств
+ */
+export const recursiveCleanDefaultValues = (viewState, propertiesSchemes) => {
+  const type = viewState.displayType || viewState.type
+  const schema = propertiesSchemes[type]
+
+  const copy = {}
+
+  for (const key of Object.keys(viewState)) {
+    const found = schema.find(item => item.key === key)
+
+    if (found) {
+      // только то, что не равно дефолтным значениям переходит в копию
+      if (found['default'] !== viewState[key]) {
+        copy[key] = viewState[key]
+      }
+    } else {
+      // то, чего нет в схеме - переходит как есть
+      copy[key] = viewState[key]
+    }
+  }
+
+  if (viewState.elements) {
+    copy.elements = viewState.elements.map(element => recursiveCleanDefaultValues(element, propertiesSchemes))
+  }
+
+  return copy
+}
+
 export const numberify = object => {
   const result = {}
   Object.keys(object).forEach(key => {

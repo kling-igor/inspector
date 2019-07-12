@@ -55,9 +55,6 @@ class ColorPicker extends Component {
   }
 
   handleClick = event => {
-    console.log('pageX:', event.pageX)
-    console.log('pageY:', event.pageY)
-
     if (event.altKey) {
       this.setState({ color: null, pickerShown: false })
       this.onSelect(null)
