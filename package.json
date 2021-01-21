@@ -16,7 +16,7 @@
     "@blueprintjs/icons": "^3.8.0",
     "@blueprintjs/select": "^3.8.0",
     "deepmerge": "^4.0.0",
-    "immer": "^3.1.3",
+    "immer": "^8.0.1",
     "js-beautify": "^1.10.0",
     "mobx": "^5.9.0",
     "mobx-react": "^5.4.3",
